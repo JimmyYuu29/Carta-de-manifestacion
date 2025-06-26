@@ -348,8 +348,16 @@ def process_uploaded_file(uploaded_file, file_type):
                 for index, row in df.iterrows():
                     if pd.notna(row[0]) and pd.notna(row[1]):
                         var_name = str(row[0]).strip()
-                        var_value = str(row[1]).strip()
                         
+                        # Manejar diferentes tipos de valores
+                        var_value = row[1]
+                
+                        # Si es una fecha/datetime, convertirla a string
+                        if pd.api.types.is_datetime64_any_dtype(type(var_value)) or isinstance(var_value, datetime):
+                            var_value = var_value.strftime("%d/%m/%Y")
+                        else:
+                            var_value = str(var_value).strip()
+
                         # Convertir 'SI'/'NO'/1/0 a 'sí'/'no' para condiciones
                         if var_value.upper() in ['SI', 'SÍ'] or var_value == '1':
                             var_value = 'sí'
