@@ -59,6 +59,28 @@ OFICINAS = {
     }
 }
 
+import locale
+
+def set_spanish_locale() -> None:
+    """
+    Fuerza el locale a español para que %B devuelva «enero, febrero…».
+    Probamos varios identificadores según sistema operativo.
+    """
+    for loc in (
+        "es_ES.UTF-8",   # Linux, macOS
+        "es_ES.utf8",
+        "es_ES",         # Windows ≥10
+        "Spanish_Spain", # Windows antiguos
+        "Spanish"        # Recurso final
+    ):
+        try:
+            locale.setlocale(locale.LC_TIME, loc)
+            break
+        except locale.Error:
+            continue
+
+set_spanish_locale()
+
 # Configuración de la página
 st.set_page_config(
     page_title="Generador de Cartas de Manifestación",
