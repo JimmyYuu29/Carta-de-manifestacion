@@ -11,6 +11,54 @@ import io
 import pandas as pd
 from openpyxl import load_workbook
 
+OFICINAS = {
+    "ALICANTE": {
+        "Direccion_Oficina": "Pintor Cabrera 22, esc. B, planta 4 A",
+        "CP": "03003",
+        "Ciudad_Oficina": "Alicante"
+    },
+    "BARCELONA": {
+        "Direccion_Oficina": "C/ Diputació, 260",
+        "CP": "08007",
+        "Ciudad_Oficina": "Barcelona"
+    },
+    "BILBAO": {
+        "Direccion_Oficina": "C/ Rodríguez Arias, 23, planta 6ª, Dpto. 12",
+        "CP": "48011",
+        "Ciudad_Oficina": "Bilbao"
+    },
+    "MADRID (Alcalá 63)": {
+        "Direccion_Oficina": "C/ Alcalá, 63",
+        "CP": "28014",
+        "Ciudad_Oficina": "Madrid"
+    },
+    "MADRID (Alcalá 61-3ª)": {
+        "Direccion_Oficina": "C/ Alcalá, 61, Planta 3ª",
+        "CP": "28014",
+        "Ciudad_Oficina": "Madrid"
+    },
+    "MÁLAGA": {
+        "Direccion_Oficina": "Pirandello nº 6 portal 3, planta 6ª, puerta 4ª",
+        "CP": "29010",
+        "Ciudad_Oficina": "Málaga"
+    },
+    "VALENCIA": {
+        "Direccion_Oficina": "C/ Félix Pizcueta, 4 – 4º",
+        "CP": "46004",
+        "Ciudad_Oficina": "Valencia"
+    },
+    "VIGO": {
+        "Direccion_Oficina": "C/ República Argentina, 25 – 1º Izda",
+        "CP": "36201",
+        "Ciudad_Oficina": "Vigo"
+    },
+    "PERSONALIZADA": {           # Opción para escritura libre
+        "Direccion_Oficina": "",
+        "CP": "",
+        "Ciudad_Oficina": ""
+    }
+}
+
 # Configuración de la página
 st.set_page_config(
     page_title="Generador de Cartas de Manifestación",
@@ -348,10 +396,8 @@ def process_uploaded_file(uploaded_file, file_type):
                 for index, row in df.iterrows():
                     if pd.notna(row[0]) and pd.notna(row[1]):
                         var_name = str(row[0]).strip()
-                        
-                        # Manejar diferentes tipos de valores
                         var_value = row[1]
-                
+                        
                         # Si es una fecha/datetime, convertirla a string
                         if pd.api.types.is_datetime64_any_dtype(type(var_value)) or isinstance(var_value, datetime):
                             var_value = var_value.strftime("%d/%m/%Y")
@@ -541,22 +587,42 @@ def main():
     
     with col1:
         st.markdown("### 📋 Información de la Oficina")
-        var_values['Direccion_Oficina'] = st.text_input(
-            "Dirección de la Oficina", 
-            value=var_values.get('Direccion_Oficina', ''),
-            key="direccion"
+        oficina_sel = st.selectbox(
+            "Selecciona la oficina",
+            list(OFICINAS.keys()),
+            index=list(OFICINAS.keys()).index(
+                var_values.get("Oficina_Seleccionada", "BARCELONA")
+            )
         )
-        var_values['CP'] = st.text_input(
-            "Código Postal", 
-            value=var_values.get('CP', ''),
-            key="cp"
-        )
-        var_values['Ciudad_Oficina'] = st.text_input(
-            "Ciudad", 
-            value=var_values.get('Ciudad_Oficina', ''),
-            key="ciudad"
-        )
+        var_values["Oficina_Seleccionada"] = oficina_sel
+           
+        sel_data = OFICINAS[oficina_sel]
+        for campo in ["Direccion_Oficina", "CP", "Ciudad_Oficina"]:
+            # Sólo pisamos valores si el usuario no había importado uno distinto
+            if campo not in var_values or var_values[campo] == "":
+                var_values[campo] = sel_data[campo]
     
+        # --- Mostrar / permitir edición -----------------------------------------
+        edicion_libre = (oficina_sel == "PERSONALIZADA")
+        var_values["Direccion_Oficina"] = st.text_input(
+            "Dirección de la Oficina",
+            value=var_values.get("Direccion_Oficina", ""),
+            key="direccion",
+            disabled=not edicion_libre
+        )
+        var_values["CP"] = st.text_input(
+            "Código Postal",
+            value=var_values.get("CP", ""),
+            key="cp",
+            disabled=not edicion_libre
+        )
+        var_values["Ciudad_Oficina"] = st.text_input(
+            "Ciudad",
+            value=var_values.get("Ciudad_Oficina", ""),
+            key="ciudad",
+            disabled=not edicion_libre
+        )
+
         st.markdown("### 🏢 Nombre de cliente")
         var_values['Nombre_Cliente'] = st.text_input(
             "Nombre del Cliente", 
