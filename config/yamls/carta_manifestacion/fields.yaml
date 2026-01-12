@@ -1,0 +1,386 @@
+# Fields - Input field definitions with types, validation, and conditional visibility
+# Definiciones de campos de entrada
+
+fields:
+  # Seccion Oficina
+  Oficina_Seleccionada:
+    type: enum
+    required: true
+    label: "Selecciona la oficina"
+    section: oficina
+    values:
+      - value: "ALICANTE"
+        label: "ALICANTE"
+      - value: "BARCELONA"
+        label: "BARCELONA"
+      - value: "BILBAO"
+        label: "BILBAO"
+      - value: "MADRID_ALCALA_63"
+        label: "MADRID (Alcala 63)"
+      - value: "MADRID_ALCALA_61"
+        label: "MADRID (Alcala 61-3)"
+      - value: "MALAGA"
+        label: "MALAGA"
+      - value: "VALENCIA"
+        label: "VALENCIA"
+      - value: "VIGO"
+        label: "VIGO"
+      - value: "PERSONALIZADA"
+        label: "PERSONALIZADA"
+    default: "BARCELONA"
+
+  Direccion_Oficina:
+    type: text
+    required: true
+    label: "Direccion de la Oficina"
+    section: oficina
+    auto_fill_from: "oficina"
+    editable_when:
+      operator: equals
+      field: Oficina_Seleccionada
+      value: "PERSONALIZADA"
+
+  CP:
+    type: text
+    required: true
+    label: "Codigo Postal"
+    section: oficina
+    auto_fill_from: "oficina"
+    validation:
+      pattern: "^[0-9]{5}$"
+    editable_when:
+      operator: equals
+      field: Oficina_Seleccionada
+      value: "PERSONALIZADA"
+
+  Ciudad_Oficina:
+    type: text
+    required: true
+    label: "Ciudad"
+    section: oficina
+    auto_fill_from: "oficina"
+    editable_when:
+      operator: equals
+      field: Oficina_Seleccionada
+      value: "PERSONALIZADA"
+
+  # Seccion Cliente
+  Nombre_Cliente:
+    type: text
+    required: true
+    label: "Nombre del Cliente"
+    section: cliente
+    validation:
+      max_length: 200
+
+  # Seccion Fechas
+  Fecha_de_hoy:
+    type: date
+    required: true
+    label: "Fecha de Hoy"
+    section: fechas
+    default: "today"
+
+  Fecha_encargo:
+    type: date
+    required: true
+    label: "Fecha del Encargo"
+    section: fechas
+
+  FF_Ejecicio:
+    type: date
+    required: true
+    label: "Fecha Fin del Ejercicio"
+    section: fechas
+
+  Fecha_cierre:
+    type: date
+    required: true
+    label: "Fecha de Cierre"
+    section: fechas
+
+  # Seccion Informacion General
+  Lista_Abogados:
+    type: text
+    required: false
+    label: "Lista de abogados y asesores fiscales"
+    section: informacion_general
+    multiline: true
+    placeholder: "Ej: Despacho ABC - Asesoria fiscal\nDespacho XYZ - Asesoria legal"
+
+  anexo_partes:
+    type: text
+    required: false
+    label: "Numero anexo partes vinculadas"
+    section: informacion_general
+    default: "2"
+
+  anexo_proyecciones:
+    type: text
+    required: false
+    label: "Numero anexo proyecciones"
+    section: informacion_general
+    default: "3"
+
+  # Seccion Organo de Administracion
+  organo:
+    type: enum
+    required: true
+    label: "Tipo de Organo de Administracion"
+    section: organo_administracion
+    values:
+      - value: "consejo"
+        label: "Consejo de Administracion"
+      - value: "administrador_unico"
+        label: "Administrador Unico"
+      - value: "administradores"
+        label: "Administradores"
+    default: "consejo"
+
+  # Seccion Opciones Condicionales
+  comision:
+    type: bool
+    required: false
+    label: "Existe Comision de Auditoria?"
+    section: opciones_condicionales
+    default: false
+
+  junta:
+    type: bool
+    required: false
+    label: "Incluir Junta de Accionistas?"
+    section: opciones_condicionales
+    default: false
+
+  comite:
+    type: bool
+    required: false
+    label: "Incluir Comite?"
+    section: opciones_condicionales
+    default: false
+
+  incorreccion:
+    type: bool
+    required: false
+    label: "Hay incorrecciones no corregidas?"
+    section: opciones_condicionales
+    default: false
+
+  Anio_incorreccion:
+    type: text
+    required: false
+    label: "Anio de la incorreccion"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: incorreccion
+      value: true
+
+  Epigrafe:
+    type: text
+    required: false
+    label: "Epigrafe afectado"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: incorreccion
+      value: true
+
+  limitacion_alcance:
+    type: bool
+    required: false
+    label: "Hay limitacion al alcance?"
+    section: opciones_condicionales
+    default: false
+    condition:
+      operator: equals
+      field: incorreccion
+      value: true
+
+  detalle_limitacion:
+    type: text
+    required: false
+    label: "Detalle de la limitacion"
+    section: opciones_condicionales
+    multiline: true
+    condition:
+      operator: and
+      conditions:
+        - operator: equals
+          field: incorreccion
+          value: true
+        - operator: equals
+          field: limitacion_alcance
+          value: true
+
+  dudas:
+    type: bool
+    required: false
+    label: "Existen dudas sobre empresa en funcionamiento?"
+    section: opciones_condicionales
+    default: false
+
+  rent:
+    type: bool
+    required: false
+    label: "Incluir parrafo sobre arrendamientos?"
+    section: opciones_condicionales
+    default: false
+
+  A_coste:
+    type: bool
+    required: false
+    label: "Hay activos valorados a coste en vez de valor razonable?"
+    section: opciones_condicionales
+    default: false
+
+  experto:
+    type: bool
+    required: false
+    label: "Se utilizo un experto independiente?"
+    section: opciones_condicionales
+    default: false
+
+  nombre_experto:
+    type: text
+    required: false
+    label: "Nombre del experto"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: experto
+      value: true
+
+  experto_valoracion:
+    type: text
+    required: false
+    label: "Elemento valorado por experto"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: experto
+      value: true
+
+  unidad_decision:
+    type: bool
+    required: false
+    label: "Bajo la misma unidad de decision?"
+    section: opciones_condicionales
+    default: false
+
+  nombre_unidad:
+    type: text
+    required: false
+    label: "Nombre de la unidad"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: unidad_decision
+      value: true
+
+  nombre_mayor_sociedad:
+    type: text
+    required: false
+    label: "Nombre de la mayor sociedad"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: unidad_decision
+      value: true
+
+  localizacion_mer:
+    type: text
+    required: false
+    label: "Localizacion o domiciliacion mercantil"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: unidad_decision
+      value: true
+
+  activo_impuesto:
+    type: bool
+    required: false
+    label: "Hay activos por impuestos diferidos?"
+    section: opciones_condicionales
+    default: false
+
+  ejercicio_recuperacion_inicio:
+    type: text
+    required: false
+    label: "Ejercicio inicio recuperacion"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: activo_impuesto
+      value: true
+
+  ejercicio_recuperacion_fin:
+    type: text
+    required: false
+    label: "Ejercicio fin recuperacion"
+    section: opciones_condicionales
+    condition:
+      operator: equals
+      field: activo_impuesto
+      value: true
+
+  operacion_fiscal:
+    type: bool
+    required: false
+    label: "Operaciones en paraisos fiscales?"
+    section: opciones_condicionales
+    default: false
+
+  detalle_operacion_fiscal:
+    type: text
+    required: false
+    label: "Detalle operaciones paraisos fiscales"
+    section: opciones_condicionales
+    multiline: true
+    condition:
+      operator: equals
+      field: operacion_fiscal
+      value: true
+
+  compromiso:
+    type: bool
+    required: false
+    label: "Compromisos por pensiones?"
+    section: opciones_condicionales
+    default: false
+
+  gestion:
+    type: bool
+    required: false
+    label: "Incluir informe de gestion?"
+    section: opciones_condicionales
+    default: false
+
+  # Seccion Alta Direccion
+  lista_alto_directores:
+    type: list
+    label: "Altos Directivos"
+    section: alta_direccion
+    item_schema:
+      nombre:
+        type: text
+        required: true
+        label: "Nombre completo"
+      cargo:
+        type: text
+        required: true
+        label: "Cargo"
+
+  # Seccion Firma
+  Nombre_Firma:
+    type: text
+    required: true
+    label: "Nombre del firmante"
+    section: firma
+
+  Cargo_Firma:
+    type: text
+    required: true
+    label: "Cargo del firmante"
+    section: firma

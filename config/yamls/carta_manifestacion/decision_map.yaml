@@ -1,0 +1,57 @@
+# Decision Map - Decision and rule mapping
+# Mapa de decisiones y reglas
+
+decisions:
+  doc_sections:
+    description: "Determinar que secciones incluir en el documento"
+    rules:
+      - r001_comision
+      - r002_junta
+      - r003_comite
+      - r004_incorreccion
+      - r005_limitacion
+      - r006_dudas
+      - r007_rent
+      - r008_a_coste
+      - r009_experto
+      - r010_unidad_decision
+      - r011_activo_impuesto
+      - r012_operacion_fiscal
+      - r013_compromiso
+      - r014_gestion
+
+  organo_text:
+    description: "Determinar el texto del organo de administracion"
+    rules:
+      - r015_organo_consejo
+      - r016_organo_unico
+      - r017_organo_administradores
+    default: "organo_consejo"
+    exclusive: true  # Solo una regla puede activarse
+
+# Mapeo de variables condicionales a sus campos dependientes
+conditional_dependencies:
+  incorreccion:
+    - Anio_incorreccion
+    - Epigrafe
+    - limitacion_alcance
+    - detalle_limitacion
+
+  experto:
+    - nombre_experto
+    - experto_valoracion
+
+  activo_impuesto:
+    - ejercicio_recuperacion_inicio
+    - ejercicio_recuperacion_fin
+
+  operacion_fiscal:
+    - detalle_operacion_fiscal
+
+  unidad_decision:
+    - nombre_unidad
+    - nombre_mayor_sociedad
+    - localizacion_mer
+
+  limitacion_alcance:
+    - detalle_limitacion

@@ -1,0 +1,29 @@
+# Tables - Table definitions
+# Definiciones de tablas
+
+tables:
+  directores:
+    id: "tabla_directores"
+    description: "Tabla de altos directivos"
+    columns:
+      - name: "nombre"
+        label: "Nombre"
+        type: "text"
+        width: "60%"
+      - name: "cargo"
+        label: "Cargo"
+        type: "text"
+        width: "40%"
+    source_field: "lista_alto_directores"
+    formatting:
+      indent: "                                  "
+      prefix: " D. "
+      separator: " - "
+      line_separator: "\n"
+
+# Formato de salida para la lista de directores
+output_format:
+  lista_directores:
+    type: "indented_list"
+    item_format: "{indent} D. {nombre} - {cargo}"
+    separator: "\n"

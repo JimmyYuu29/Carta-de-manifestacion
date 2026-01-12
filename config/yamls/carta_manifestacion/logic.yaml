@@ -1,0 +1,198 @@
+# Logic - Conditional rules using DSL expressions
+# Reglas condicionales con expresiones DSL
+
+rules:
+  r001_comision:
+    rule_id: r001_comision
+    name: "Incluir seccion de Comision de Auditoria"
+    condition:
+      operator: equals
+      field: comision
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_comision"]
+
+  r002_junta:
+    rule_id: r002_junta
+    name: "Incluir Junta de Accionistas"
+    condition:
+      operator: equals
+      field: junta
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_junta"]
+
+  r003_comite:
+    rule_id: r003_comite
+    name: "Incluir Comite"
+    condition:
+      operator: equals
+      field: comite
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_comite"]
+
+  r004_incorreccion:
+    rule_id: r004_incorreccion
+    name: "Incluir seccion de incorrecciones"
+    condition:
+      operator: equals
+      field: incorreccion
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_incorreccion"]
+
+  r005_limitacion:
+    rule_id: r005_limitacion
+    name: "Incluir detalle de limitacion al alcance"
+    condition:
+      operator: and
+      conditions:
+        - operator: equals
+          field: incorreccion
+          value: true
+        - operator: equals
+          field: limitacion_alcance
+          value: true
+    action:
+      type: include_block
+      elements: ["bloque_limitacion_alcance"]
+
+  r006_dudas:
+    rule_id: r006_dudas
+    name: "Incluir seccion de dudas empresa en funcionamiento"
+    condition:
+      operator: equals
+      field: dudas
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_dudas"]
+
+  r007_rent:
+    rule_id: r007_rent
+    name: "Incluir parrafo sobre arrendamientos"
+    condition:
+      operator: equals
+      field: rent
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_rent"]
+
+  r008_a_coste:
+    rule_id: r008_a_coste
+    name: "Incluir seccion de activos a coste"
+    condition:
+      operator: equals
+      field: A_coste
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_a_coste"]
+
+  r009_experto:
+    rule_id: r009_experto
+    name: "Incluir seccion de experto independiente"
+    condition:
+      operator: equals
+      field: experto
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_experto"]
+
+  r010_unidad_decision:
+    rule_id: r010_unidad_decision
+    name: "Incluir seccion de unidad de decision"
+    condition:
+      operator: equals
+      field: unidad_decision
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_unidad_decision"]
+
+  r011_activo_impuesto:
+    rule_id: r011_activo_impuesto
+    name: "Incluir seccion de activos por impuestos diferidos"
+    condition:
+      operator: equals
+      field: activo_impuesto
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_activo_impuesto"]
+
+  r012_operacion_fiscal:
+    rule_id: r012_operacion_fiscal
+    name: "Incluir seccion de operaciones en paraisos fiscales"
+    condition:
+      operator: equals
+      field: operacion_fiscal
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_operacion_fiscal"]
+
+  r013_compromiso:
+    rule_id: r013_compromiso
+    name: "Incluir seccion de compromisos por pensiones"
+    condition:
+      operator: equals
+      field: compromiso
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_compromiso"]
+
+  r014_gestion:
+    rule_id: r014_gestion
+    name: "Incluir informe de gestion"
+    condition:
+      operator: equals
+      field: gestion
+      value: true
+    action:
+      type: include_block
+      elements: ["bloque_gestion"]
+
+  r015_organo_consejo:
+    rule_id: r015_organo_consejo
+    name: "Mostrar texto para Consejo de Administracion"
+    condition:
+      operator: equals
+      field: organo
+      value: "consejo"
+    action:
+      type: set_text
+      elements: ["texto_organo"]
+      text_key: "organo_consejo"
+
+  r016_organo_unico:
+    rule_id: r016_organo_unico
+    name: "Mostrar texto para Administrador Unico"
+    condition:
+      operator: equals
+      field: organo
+      value: "administrador_unico"
+    action:
+      type: set_text
+      elements: ["texto_organo"]
+      text_key: "organo_administrador_unico"
+
+  r017_organo_administradores:
+    rule_id: r017_organo_administradores
+    name: "Mostrar texto para Administradores"
+    condition:
+      operator: equals
+      field: organo
+      value: "administradores"
+    action:
+      type: set_text
+      elements: ["texto_organo"]
+      text_key: "organo_administradores"
