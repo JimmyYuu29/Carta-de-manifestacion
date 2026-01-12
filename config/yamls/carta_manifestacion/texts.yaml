@@ -1,0 +1,47 @@
+# Texts - Fixed text blocks library
+# Biblioteca de bloques de texto fijos
+
+text_blocks:
+  organo_consejo:
+    id: "organo_consejo"
+    content: "Consejo de Administracion"
+    description: "Texto para organo de tipo Consejo"
+
+  organo_administrador_unico:
+    id: "organo_administrador_unico"
+    content: "Administrador Unico"
+    description: "Texto para organo de tipo Administrador Unico"
+
+  organo_administradores:
+    id: "organo_administradores"
+    content: "Administradores"
+    description: "Texto para organo de tipo Administradores"
+
+  # Textos para secciones condicionales
+  seccion_comision:
+    id: "seccion_comision"
+    content: "Comision de Auditoria"
+
+  seccion_junta:
+    id: "seccion_junta"
+    content: "Junta de Accionistas"
+
+  seccion_comite:
+    id: "seccion_comite"
+    content: "Comite"
+
+# Plantillas de texto parametrizadas
+templates:
+  director_line:
+    pattern: "                                   D. {nombre} - {cargo}"
+    description: "Linea formateada para cada director"
+
+  header_firma:
+    pattern: "{nombre}\n{cargo}"
+    description: "Bloque de firma con nombre y cargo"
+
+# Textos por defecto para campos vacios
+defaults:
+  Lista_Abogados: ""
+  detalle_limitacion: ""
+  detalle_operacion_fiscal: ""

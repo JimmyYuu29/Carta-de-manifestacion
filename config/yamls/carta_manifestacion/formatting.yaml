@@ -1,0 +1,72 @@
+# Formatting - Formatting rules for dates, currencies, colors
+# Reglas de formateo para fechas, monedas, colores
+
+fields:
+  # Fechas en formato espanol
+  Fecha_de_hoy:
+    type: date
+    format: "spanish"  # "31 de diciembre de 2025"
+
+  Fecha_encargo:
+    type: date
+    format: "spanish"
+
+  FF_Ejecicio:
+    type: date
+    format: "spanish"
+
+  Fecha_cierre:
+    type: date
+    format: "spanish"
+
+# Meses en espanol
+spanish_months:
+  - "enero"
+  - "febrero"
+  - "marzo"
+  - "abril"
+  - "mayo"
+  - "junio"
+  - "julio"
+  - "agosto"
+  - "septiembre"
+  - "octubre"
+  - "noviembre"
+  - "diciembre"
+
+# Colores para celdas de tablas
+colors:
+  "si": "#90EE90"      # Verde claro
+  "no": "#FFB6C1"      # Rojo claro
+  "parcial": "#FFFFE0" # Amarillo claro
+
+# Formatos de numero
+number_formats:
+  currency:
+    locale: "es_ES"
+    symbol: "EUR"
+    decimal_separator: ","
+    thousands_separator: "."
+    decimal_places: 2
+    pattern: "{value} EUR"
+
+  percentage:
+    decimal_separator: ","
+    decimal_places: 2
+    pattern: "{value} %"
+
+  integer:
+    thousands_separator: "."
+
+# Patrones de limpieza para el documento
+cleanup_patterns:
+  - pattern: '\[?\{\{[^}]*\}\}\]?'
+    replacement: ""
+  - pattern: '\[\]\.mark'
+    replacement: ""
+  - pattern: '\.mark'
+    replacement: ""
+  - pattern: '\[\.mark\]'
+    replacement: ""
+  - pattern: '\{%[^%]*%\}'
+    replacement: ""

@@ -1,4 +1,14 @@
+# Carta de Manifestacion Generator - Dependencies
+# Generador de Cartas de Manifestacion - Dependencias
+
+# Core
 streamlit>=1.34
-python-docx
-openpyxl
-pandas
+python-docx>=1.0.0
+PyYAML>=6.0
+
+# Data processing
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Optional: Pydantic for data validation
+pydantic>=2.0.0

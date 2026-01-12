@@ -1,0 +1,130 @@
+# Derived - Derived field calculation formulas
+# Formulas de calculo de campos derivados
+
+derived_fields:
+  # Formato de lista de directores
+  lista_alto_directores_formatted:
+    type: text
+    formula: "format_directors_list(lista_alto_directores)"
+    dependencies:
+      - lista_alto_directores
+    description: "Lista formateada de altos directivos con indentacion"
+
+  # Anio del ejercicio extraido de la fecha
+  anyo_ejercicio:
+    type: int
+    formula: "extract_year(FF_Ejecicio)"
+    dependencies:
+      - FF_Ejecicio
+    description: "Anio extraido de la fecha de fin de ejercicio"
+
+  # Anio anterior
+  anyo_anterior:
+    type: int
+    formula: "extract_year(FF_Ejecicio) - 1"
+    dependencies:
+      - FF_Ejecicio
+    description: "Anio anterior al ejercicio"
+
+  # Conversion de booleanos a si/no para el template
+  comision_sn:
+    type: text
+    formula: "bool_to_sino(comision)"
+    dependencies:
+      - comision
+
+  junta_sn:
+    type: text
+    formula: "bool_to_sino(junta)"
+    dependencies:
+      - junta
+
+  comite_sn:
+    type: text
+    formula: "bool_to_sino(comite)"
+    dependencies:
+      - comite
+
+  incorreccion_sn:
+    type: text
+    formula: "bool_to_sino(incorreccion)"
+    dependencies:
+      - incorreccion
+
+  dudas_sn:
+    type: text
+    formula: "bool_to_sino(dudas)"
+    dependencies:
+      - dudas
+
+  rent_sn:
+    type: text
+    formula: "bool_to_sino(rent)"
+    dependencies:
+      - rent
+
+  A_coste_sn:
+    type: text
+    formula: "bool_to_sino(A_coste)"
+    dependencies:
+      - A_coste
+
+  experto_sn:
+    type: text
+    formula: "bool_to_sino(experto)"
+    dependencies:
+      - experto
+
+  unidad_decision_sn:
+    type: text
+    formula: "bool_to_sino(unidad_decision)"
+    dependencies:
+      - unidad_decision
+
+  activo_impuesto_sn:
+    type: text
+    formula: "bool_to_sino(activo_impuesto)"
+    dependencies:
+      - activo_impuesto
+
+  operacion_fiscal_sn:
+    type: text
+    formula: "bool_to_sino(operacion_fiscal)"
+    dependencies:
+      - operacion_fiscal
+
+  compromiso_sn:
+    type: text
+    formula: "bool_to_sino(compromiso)"
+    dependencies:
+      - compromiso
+
+  gestion_sn:
+    type: text
+    formula: "bool_to_sino(gestion)"
+    dependencies:
+      - gestion
+
+  limitacion_alcance_sn:
+    type: text
+    formula: "bool_to_sino(limitacion_alcance)"
+    dependencies:
+      - limitacion_alcance
+
+# Funciones disponibles para formulas
+available_functions:
+  - name: "extract_year"
+    description: "Extrae el anio de una fecha"
+    params: ["date_value"]
+
+  - name: "format_directors_list"
+    description: "Formatea la lista de directores con indentacion"
+    params: ["directors_list"]
+
+  - name: "bool_to_sino"
+    description: "Convierte booleano a si/no"
+    params: ["bool_value"]
+
+  - name: "sum"
+    description: "Suma valores de una lista"
+    params: ["list_field.property"]

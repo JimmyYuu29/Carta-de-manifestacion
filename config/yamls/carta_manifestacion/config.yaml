@@ -1,0 +1,90 @@
+# Config - Runtime configuration & UI definition
+# Configuracion de runtime y definicion de UI
+
+app:
+  title: "Generador de Cartas de Manifestacion"
+  subtitle: "Forvis Mazars"
+  icon: "page_facing_up"
+  layout: "wide"
+
+sections:
+  - id: oficina
+    title: "Informacion de la Oficina"
+    icon: "clipboard"
+    order: 1
+
+  - id: cliente
+    title: "Nombre de cliente"
+    icon: "building"
+    order: 2
+
+  - id: fechas
+    title: "Fechas"
+    icon: "calendar"
+    order: 3
+
+  - id: informacion_general
+    title: "Informacion General"
+    icon: "memo"
+    order: 4
+
+  - id: organo_administracion
+    title: "Organo de Administracion"
+    icon: "busts_in_silhouette"
+    order: 5
+
+  - id: opciones_condicionales
+    title: "Opciones Condicionales"
+    icon: "ballot_box_with_check"
+    order: 6
+
+  - id: alta_direccion
+    title: "Alta Direccion"
+    icon: "necktie"
+    order: 7
+
+  - id: firma
+    title: "Persona de firma"
+    icon: "busts_in_silhouette"
+    order: 8
+
+oficinas:
+  ALICANTE:
+    Direccion_Oficina: "Pintor Cabrera 22, esc. B, planta 4 A"
+    CP: "03003"
+    Ciudad_Oficina: "Alicante"
+  BARCELONA:
+    Direccion_Oficina: "C/ Diputacio, 260"
+    CP: "08007"
+    Ciudad_Oficina: "Barcelona"
+  BILBAO:
+    Direccion_Oficina: "C/ Rodriguez Arias, 23, planta 6, Dpto. 12"
+    CP: "48011"
+    Ciudad_Oficina: "Bilbao"
+  MADRID_ALCALA_63:
+    Direccion_Oficina: "C/ Alcala, 63"
+    CP: "28014"
+    Ciudad_Oficina: "Madrid"
+    display_name: "MADRID (Alcala 63)"
+  MADRID_ALCALA_61:
+    Direccion_Oficina: "C/ Alcala, 61, Planta 3"
+    CP: "28014"
+    Ciudad_Oficina: "Madrid"
+    display_name: "MADRID (Alcala 61-3)"
+  MALAGA:
+    Direccion_Oficina: "Pirandello n 6 portal 3, planta 6, puerta 4"
+    CP: "29010"
+    Ciudad_Oficina: "Malaga"
+  VALENCIA:
+    Direccion_Oficina: "C/ Felix Pizcueta, 4 - 4"
+    CP: "46004"
+    Ciudad_Oficina: "Valencia"
+  VIGO:
+    Direccion_Oficina: "C/ Republica Argentina, 25 - 1 Izda"
+    CP: "36201"
+    Ciudad_Oficina: "Vigo"
+  PERSONALIZADA:
+    Direccion_Oficina: ""
+    CP: ""
+    Ciudad_Oficina: ""
+    editable: true

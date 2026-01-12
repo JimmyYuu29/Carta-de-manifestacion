@@ -1,0 +1,23 @@
+# Manifest - Carta de Manifestacion Plugin
+# Plugin metadata and configuration
+
+plugin_id: carta_manifestacion
+version: "2.0.0"
+name: "Generador de Cartas de Manifestacion"
+description: "Genera cartas de manifestacion para auditorias - Forvis Mazars"
+author: "Forvis Mazars"
+created_at: "2025-01-01"
+
+template:
+  path: "config/templates/carta_manifestacion/template.docx"
+  type: "docx"
+
+sensitive_fields:
+  - Nombre_Cliente
+  - Nombre_Firma
+  - nombre_experto
+
+defaults:
+  locale: "es_ES"
+  date_format: "spanish"
+  currency: "EUR"
