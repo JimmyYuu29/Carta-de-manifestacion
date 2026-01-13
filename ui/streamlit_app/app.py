@@ -7,7 +7,6 @@ import streamlit as st
 from datetime import datetime
 from pathlib import Path
 import sys
-import io
 import pandas as pd
 from docx import Document
 
@@ -21,22 +20,7 @@ from modules.context_builder import format_spanish_date, parse_date_string
 
 from ui.streamlit_app.state_store import (
     init_session_state,
-    get_field_value,
-    set_field_value,
-    get_list_items,
-    add_list_item,
-    remove_list_item,
-    get_all_form_data,
-    clear_form_data,
     set_imported_data,
-    get_stable_key,
-)
-from ui.streamlit_app.components import (
-    render_header,
-    render_section_header,
-    render_success_message,
-    render_error_message,
-    render_divider,
 )
 from ui.streamlit_app.form_renderer import FormRenderer
 
@@ -103,10 +87,10 @@ def process_uploaded_file(uploaded_file, file_type: str) -> dict:
 def main():
     """Main application entry point / Punto de entrada principal"""
 
-    # Page configuration
+    # Page configuration / Configuración de página
     st.set_page_config(
-        page_title="Generador de Cartas de Manifestacion",
-        page_icon="page_facing_up",
+        page_title="Generador de Cartas de Manifestación",
+        page_icon="📄",
         layout="wide"
     )
 
@@ -123,11 +107,9 @@ def main():
     # Create form renderer
     form_renderer = FormRenderer(plugin)
 
-    # Header
-    render_header(
-        "Generador de Cartas de Manifestacion",
-        "Forvis Mazars"
-    )
+    # Main title / Título principal
+    st.title("🏢 Generador de Cartas de Manifestación - Forvis Mazars")
+    st.markdown("---")
 
     # Get template path
     template_path = PROJECT_ROOT / "Modelo de plantilla.docx"
@@ -136,15 +118,19 @@ def main():
         template_path = plugin.get_template_path()
 
     if not template_path.exists():
-        st.error(f"No se encontro el archivo de plantilla")
-        st.info("Por favor, asegurate de que el archivo de plantilla este en la carpeta correcta.")
+        st.error(f"⚠️ No se encontró el archivo de plantilla")
+        st.info("Por favor, asegúrate de que el archivo de plantilla esté en la carpeta correcta.")
         return
 
-    st.success("Plantilla cargada correctamente")
+    # Template analysis message
+    st.success(f"✅ Plantilla analizada correctamente.")
 
-    # Import section
-    render_divider()
-    render_section_header("Importar datos desde archivo", "file_folder")
+    # Form subtitle / Subtítulo del formulario
+    st.subheader("📝 Información de la Carta")
+
+    # Import section / Sección de importación
+    st.markdown("---")
+    st.subheader("📁 Importar datos desde archivo")
 
     col_import1, col_import2 = st.columns(2)
 
@@ -160,28 +146,30 @@ def main():
         uploaded_word = st.file_uploader(
             "Cargar archivo Word (.docx)",
             type=['docx'],
-            help="Formato: nombre_variable: valor (una por linea)",
+            help="Formato: nombre_variable: valor (una por línea)",
             key="word_upload"
         )
 
     # Process uploaded files
+    imported_data = {}
+
     if uploaded_excel is not None:
         with st.spinner("Procesando archivo Excel..."):
             imported_data = process_uploaded_file(uploaded_excel, "excel")
             if imported_data:
                 set_imported_data(imported_data)
-                st.success(f"Se importaron {len(imported_data)} valores desde Excel")
+                st.success(f"✅ Se importaron {len(imported_data)} valores desde Excel")
 
     elif uploaded_word is not None:
         with st.spinner("Procesando archivo Word..."):
             imported_data = process_uploaded_file(uploaded_word, "word")
             if imported_data:
                 set_imported_data(imported_data)
-                st.success(f"Se importaron {len(imported_data)} valores desde Word")
+                st.success(f"✅ Se importaron {len(imported_data)} valores desde Word")
 
-    render_divider()
+    st.markdown("---")
 
-    # Form sections in columns
+    # Form sections in columns / Secciones del formulario en columnas
     col1, col2 = st.columns(2)
 
     # Get current form data
@@ -189,20 +177,20 @@ def main():
     cond_values = {}
 
     with col1:
-        # Office section
-        render_section_header("Informacion de la Oficina", "clipboard")
+        # Office section / Sección de oficina
+        st.markdown("### 📋 Información de la Oficina")
         var_values = form_renderer.render_oficina_section(var_values)
 
-        # Client section
-        render_section_header("Nombre de cliente", "building")
+        # Client section / Sección de cliente
+        st.markdown("### 🏢 Nombre de cliente")
         var_values['Nombre_Cliente'] = st.text_input(
-            "Nombre del Cliente *",
+            "Nombre del Cliente",
             value=var_values.get('Nombre_Cliente', ''),
             key="nombre_cliente"
         )
 
-        # Dates section
-        render_section_header("Fechas", "calendar")
+        # Dates section / Sección de fechas
+        st.markdown("### 📅 Fechas")
 
         fecha_hoy = parse_date_string(var_values.get('Fecha_de_hoy', ''))
         if not fecha_hoy:
@@ -232,32 +220,32 @@ def main():
             st.date_input("Fecha de Cierre", value=fecha_cierre, key="fecha_cierre")
         )
 
-        # General info section
-        render_section_header("Informacion General", "memo")
+        # General info section / Sección de información general
+        st.markdown("### 📝 Información General")
         var_values['Lista_Abogados'] = st.text_area(
             "Lista de abogados y asesores fiscales",
             value=var_values.get('Lista_Abogados', ''),
-            placeholder="Ej: Despacho ABC - Asesoria fiscal\nDespacho XYZ - Asesoria legal",
+            placeholder="Ej: Despacho ABC - Asesoría fiscal\nDespacho XYZ - Asesoría legal",
             key="abogados"
         )
         var_values['anexo_partes'] = st.text_input(
-            "Numero anexo partes vinculadas",
+            "Número anexo partes vinculadas",
             value=var_values.get('anexo_partes', '2'),
             key="anexo_partes"
         )
         var_values['anexo_proyecciones'] = st.text_input(
-            "Numero anexo proyecciones",
+            "Número anexo proyecciones",
             value=var_values.get('anexo_proyecciones', '3'),
             key="anexo_proyecciones"
         )
 
     with col2:
-        # Administration organ section
-        render_section_header("Organo de Administracion", "busts_in_silhouette")
+        # Administration organ section / Sección órgano de administración
+        st.markdown("### 👥 Órgano de Administración")
         organo_options = ['consejo', 'administrador_unico', 'administradores']
         organo_labels = {
-            'consejo': 'Consejo de Administracion',
-            'administrador_unico': 'Administrador Unico',
+            'consejo': 'Consejo de Administración',
+            'administrador_unico': 'Administrador Único',
             'administradores': 'Administradores'
         }
         organo_default = var_values.get('organo', 'consejo')
@@ -265,92 +253,92 @@ def main():
             organo_default = 'consejo'
 
         cond_values['organo'] = st.selectbox(
-            "Tipo de Organo de Administracion",
+            "Tipo de Órgano de Administración",
             options=organo_options,
             index=organo_options.index(organo_default),
             format_func=lambda x: organo_labels.get(x, x),
             key="organo"
         )
 
-        # Conditional options section
-        render_section_header("Opciones Condicionales", "ballot_box_with_check")
+        # Conditional options section / Sección opciones condicionales
+        st.markdown("### ✅ Opciones Condicionales")
 
-        cond_values['comision'] = st.checkbox(
-            "Existe Comision de Auditoria?",
-            value=var_values.get('comision', False),
+        cond_values['comision'] = 'sí' if st.checkbox(
+            "¿Existe Comisión de Auditoría?",
+            value=var_values.get('comision', False) if isinstance(var_values.get('comision'), bool) else var_values.get('comision') == 'sí',
             key="comision"
-        )
+        ) else 'no'
 
-        cond_values['junta'] = st.checkbox(
-            "Incluir Junta de Accionistas?",
-            value=var_values.get('junta', False),
+        cond_values['junta'] = 'sí' if st.checkbox(
+            "¿Incluir Junta de Accionistas?",
+            value=var_values.get('junta', False) if isinstance(var_values.get('junta'), bool) else var_values.get('junta') == 'sí',
             key="junta"
-        )
+        ) else 'no'
 
-        cond_values['comite'] = st.checkbox(
-            "Incluir Comite?",
-            value=var_values.get('comite', False),
+        cond_values['comite'] = 'sí' if st.checkbox(
+            "¿Incluir Comité?",
+            value=var_values.get('comite', False) if isinstance(var_values.get('comite'), bool) else var_values.get('comite') == 'sí',
             key="comite"
-        )
+        ) else 'no'
 
-        cond_values['incorreccion'] = st.checkbox(
-            "Hay incorrecciones no corregidas?",
-            value=var_values.get('incorreccion', False),
+        cond_values['incorreccion'] = 'sí' if st.checkbox(
+            "¿Hay incorrecciones no corregidas?",
+            value=var_values.get('incorreccion', False) if isinstance(var_values.get('incorreccion'), bool) else var_values.get('incorreccion') == 'sí',
             key="incorreccion"
-        )
+        ) else 'no'
 
-        if cond_values['incorreccion']:
+        if cond_values['incorreccion'] == 'sí':
             with st.container():
-                st.markdown("##### Detalles de incorrecciones")
+                st.markdown("##### 📌 Detalles de incorrecciones")
                 var_values['Anio_incorreccion'] = st.text_input(
-                    "Anio de la incorreccion",
+                    "Año de la incorrección",
                     value=var_values.get('Anio_incorreccion', ''),
                     key="anio_inc"
                 )
                 var_values['Epigrafe'] = st.text_input(
-                    "Epigrafe afectado",
+                    "Epígrafe afectado",
                     value=var_values.get('Epigrafe', ''),
                     key="epigrafe"
                 )
-                cond_values['limitacion_alcance'] = st.checkbox(
-                    "Hay limitacion al alcance?",
-                    value=var_values.get('limitacion_alcance', False),
+                cond_values['limitacion_alcance'] = 'sí' if st.checkbox(
+                    "¿Hay limitación al alcance?",
+                    value=var_values.get('limitacion_alcance', False) if isinstance(var_values.get('limitacion_alcance'), bool) else var_values.get('limitacion_alcance') == 'sí',
                     key="limitacion"
-                )
-                if cond_values['limitacion_alcance']:
+                ) else 'no'
+                if cond_values['limitacion_alcance'] == 'sí':
                     var_values['detalle_limitacion'] = st.text_area(
-                        "Detalle de la limitacion",
+                        "Detalle de la limitación",
                         value=var_values.get('detalle_limitacion', ''),
                         key="det_limitacion"
                     )
 
-        cond_values['dudas'] = st.checkbox(
-            "Existen dudas sobre empresa en funcionamiento?",
-            value=var_values.get('dudas', False),
+        cond_values['dudas'] = 'sí' if st.checkbox(
+            "¿Existen dudas sobre empresa en funcionamiento?",
+            value=var_values.get('dudas', False) if isinstance(var_values.get('dudas'), bool) else var_values.get('dudas') == 'sí',
             key="dudas"
-        )
+        ) else 'no'
 
-        cond_values['rent'] = st.checkbox(
-            "Incluir parrafo sobre arrendamientos?",
-            value=var_values.get('rent', False),
+        cond_values['rent'] = 'sí' if st.checkbox(
+            "¿Incluir párrafo sobre arrendamientos?",
+            value=var_values.get('rent', False) if isinstance(var_values.get('rent'), bool) else var_values.get('rent') == 'sí',
             key="rent"
-        )
+        ) else 'no'
 
-        cond_values['A_coste'] = st.checkbox(
-            "Hay activos valorados a coste en vez de valor razonable?",
-            value=var_values.get('A_coste', False),
+        cond_values['A_coste'] = 'sí' if st.checkbox(
+            "¿Hay activos valorados a coste en vez de valor razonable?",
+            value=var_values.get('A_coste', False) if isinstance(var_values.get('A_coste'), bool) else var_values.get('A_coste') == 'sí',
             key="a_coste"
-        )
+        ) else 'no'
 
-        cond_values['experto'] = st.checkbox(
-            "Se utilizo un experto independiente?",
-            value=var_values.get('experto', False),
+        cond_values['experto'] = 'sí' if st.checkbox(
+            "¿Se utilizó un experto independiente?",
+            value=var_values.get('experto', False) if isinstance(var_values.get('experto'), bool) else var_values.get('experto') == 'sí',
             key="experto"
-        )
+        ) else 'no'
 
-        if cond_values['experto']:
+        if cond_values['experto'] == 'sí':
             with st.container():
-                st.markdown("##### Informacion del experto")
+                st.markdown("##### 📌 Información del experto")
                 var_values['nombre_experto'] = st.text_input(
                     "Nombre del experto",
                     value=var_values.get('nombre_experto', ''),
@@ -362,15 +350,15 @@ def main():
                     key="experto_val"
                 )
 
-        cond_values['unidad_decision'] = st.checkbox(
-            "Bajo la misma unidad de decision?",
-            value=var_values.get('unidad_decision', False),
+        cond_values['unidad_decision'] = 'sí' if st.checkbox(
+            "¿Bajo la misma unidad de decisión?",
+            value=var_values.get('unidad_decision', False) if isinstance(var_values.get('unidad_decision'), bool) else var_values.get('unidad_decision') == 'sí',
             key="unidad_decision"
-        )
+        ) else 'no'
 
-        if cond_values['unidad_decision']:
+        if cond_values['unidad_decision'] == 'sí':
             with st.container():
-                st.markdown("##### Informacion de la unidad de decision")
+                st.markdown("##### 📌 Información de la unidad de decisión")
                 var_values['nombre_unidad'] = st.text_input(
                     "Nombre de la unidad",
                     value=var_values.get('nombre_unidad', ''),
@@ -382,66 +370,66 @@ def main():
                     key="nombre_mayor_sociedad"
                 )
                 var_values['localizacion_mer'] = st.text_input(
-                    "Localizacion o domiciliacion mercantil",
+                    "Localización o domiciliación mercantil",
                     value=var_values.get('localizacion_mer', ''),
                     key="localizacion_mer"
                 )
 
-        cond_values['activo_impuesto'] = st.checkbox(
-            "Hay activos por impuestos diferidos?",
-            value=var_values.get('activo_impuesto', False),
+        cond_values['activo_impuesto'] = 'sí' if st.checkbox(
+            "¿Hay activos por impuestos diferidos?",
+            value=var_values.get('activo_impuesto', False) if isinstance(var_values.get('activo_impuesto'), bool) else var_values.get('activo_impuesto') == 'sí',
             key="activo_impuesto"
-        )
+        ) else 'no'
 
-        if cond_values['activo_impuesto']:
+        if cond_values['activo_impuesto'] == 'sí':
             with st.container():
-                st.markdown("##### Recuperacion de activos")
+                st.markdown("##### 📌 Recuperación de activos")
                 var_values['ejercicio_recuperacion_inicio'] = st.text_input(
-                    "Ejercicio inicio recuperacion",
+                    "Ejercicio inicio recuperación",
                     value=var_values.get('ejercicio_recuperacion_inicio', ''),
                     key="rec_inicio"
                 )
                 var_values['ejercicio_recuperacion_fin'] = st.text_input(
-                    "Ejercicio fin recuperacion",
+                    "Ejercicio fin recuperación",
                     value=var_values.get('ejercicio_recuperacion_fin', ''),
                     key="rec_fin"
                 )
 
-        cond_values['operacion_fiscal'] = st.checkbox(
-            "Operaciones en paraisos fiscales?",
-            value=var_values.get('operacion_fiscal', False),
+        cond_values['operacion_fiscal'] = 'sí' if st.checkbox(
+            "¿Operaciones en paraísos fiscales?",
+            value=var_values.get('operacion_fiscal', False) if isinstance(var_values.get('operacion_fiscal'), bool) else var_values.get('operacion_fiscal') == 'sí',
             key="operacion_fiscal"
-        )
+        ) else 'no'
 
-        if cond_values['operacion_fiscal']:
+        if cond_values['operacion_fiscal'] == 'sí':
             with st.container():
-                st.markdown("##### Detalle operaciones")
+                st.markdown("##### 📌 Detalle operaciones")
                 var_values['detalle_operacion_fiscal'] = st.text_area(
-                    "Detalle operaciones paraisos fiscales",
+                    "Detalle operaciones paraísos fiscales",
                     value=var_values.get('detalle_operacion_fiscal', ''),
                     key="det_fiscal"
                 )
 
-        cond_values['compromiso'] = st.checkbox(
-            "Compromisos por pensiones?",
-            value=var_values.get('compromiso', False),
+        cond_values['compromiso'] = 'sí' if st.checkbox(
+            "¿Compromisos por pensiones?",
+            value=var_values.get('compromiso', False) if isinstance(var_values.get('compromiso'), bool) else var_values.get('compromiso') == 'sí',
             key="compromiso"
-        )
+        ) else 'no'
 
-        cond_values['gestion'] = st.checkbox(
-            "Incluir informe de gestion?",
-            value=var_values.get('gestion', False),
+        cond_values['gestion'] = 'sí' if st.checkbox(
+            "¿Incluir informe de gestión?",
+            value=var_values.get('gestion', False) if isinstance(var_values.get('gestion'), bool) else var_values.get('gestion') == 'sí',
             key="gestion"
-        )
+        ) else 'no'
 
-    # Directors section
-    render_divider()
-    render_section_header("Alta Direccion", "necktie")
+    # Directors section / Sección alta dirección
+    st.markdown("---")
+    st.markdown("### 👔 Alta Dirección")
 
-    st.info("Introduce los nombres y cargos de los altos directivos.")
+    st.info("Introduce los nombres y cargos de los altos directivos. Estos reemplazarán completamente el ejemplo en la plantilla.")
 
     num_directivos = st.number_input(
-        "Numero de altos directivos",
+        "Número de altos directivos",
         min_value=0,
         max_value=10,
         value=2,
@@ -462,13 +450,9 @@ def main():
 
     var_values['lista_alto_directores'] = "\n".join(directivos_list)
 
-    if directivos_list:
-        st.markdown("#### Vista previa de la lista de directivos:")
-        st.code("\n".join(directivos_list))
-
-    # Signature section
-    render_divider()
-    render_section_header("Persona de firma", "busts_in_silhouette")
+    # Signature section / Sección persona de firma
+    st.markdown("---")
+    st.markdown("### 👥 Persona de firma")
 
     var_values['Nombre_Firma'] = st.text_input(
         "Nombre del firmante",
@@ -481,19 +465,38 @@ def main():
         key="cargo_firma"
     )
 
+    # Preview directors list
+    if directivos_list:
+        st.markdown("#### Vista previa de la lista de directivos:")
+        st.code("\n".join(directivos_list))
+
     # Update session state
     st.session_state.form_data = {**var_values, **cond_values}
 
-    # Generate button
-    render_divider()
+    # Automatic review section / Sección de revisión automática
+    st.markdown("---")
+    st.header("🔍 Revisión automática")
 
-    if st.button("Generar Carta de Manifestacion", type="primary"):
-        # Validate required fields
-        required_fields = ['Nombre_Cliente', 'Direccion_Oficina', 'CP', 'Ciudad_Oficina']
-        missing_fields = [f for f in required_fields if not var_values.get(f)]
+    # Required fields validation
+    required_fields = ['Nombre_Cliente', 'Direccion_Oficina', 'CP', 'Ciudad_Oficina']
+    missing_fields = [f for f in required_fields if not var_values.get(f)]
 
+    # Show import summary if data was imported
+    if imported_data:
+        st.info(f"📊 Datos importados: {len(imported_data)} valores")
+
+    # Inform user about validation status
+    if not missing_fields:
+        st.success("✅ Todas las variables y condiciones están completas.")
+    else:
+        st.warning(f"⚠️ Faltan {len(missing_fields)} campos obligatorios: {', '.join(missing_fields)}")
+
+    # Generate button / Botón de generación
+    st.markdown("---")
+
+    if st.button("🚀 Generar Carta de Manifestación", type="primary"):
         if missing_fields:
-            st.error(f"Por favor completa los siguientes campos obligatorios: {', '.join(missing_fields)}")
+            st.error(f"⚠️ Por favor completa los siguientes campos obligatorios: {', '.join(missing_fields)}")
         else:
             with st.spinner("Generando carta..."):
                 try:
@@ -510,7 +513,7 @@ def main():
                     )
 
                     if result.success and result.output_path:
-                        st.success("Carta generada exitosamente!")
+                        st.success("✅ Carta generada exitosamente!")
 
                         # Read generated file
                         with open(result.output_path, 'rb') as f:
@@ -519,19 +522,19 @@ def main():
                         filename = f"Carta_Manifestacion_{var_values['Nombre_Cliente'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.docx"
 
                         st.download_button(
-                            label="Descargar Carta de Manifestacion",
+                            label="📥 Descargar Carta de Manifestación",
                             data=doc_bytes,
                             file_name=filename,
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         )
                     else:
-                        st.error(f"Error al generar la carta: {result.error}")
+                        st.error(f"❌ Error al generar la carta: {result.error}")
                         if result.validation_errors:
                             for err in result.validation_errors:
                                 st.warning(err)
 
                 except Exception as e:
-                    st.error(f"Error al generar la carta: {str(e)}")
+                    st.error(f"❌ Error al generar la carta: {str(e)}")
                     st.exception(e)
 
 
