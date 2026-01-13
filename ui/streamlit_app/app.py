@@ -4,9 +4,11 @@ Aplicacion principal de Streamlit - Generador de Cartas de Manifestacion
 """
 
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 import sys
+import json
+import io
 import pandas as pd
 from docx import Document
 
@@ -84,6 +86,77 @@ def process_uploaded_file(uploaded_file, file_type: str) -> dict:
     return extracted_data
 
 
+def process_json_file(uploaded_file) -> dict:
+    """
+    Process uploaded JSON file
+    Procesar archivo JSON cargado
+    """
+    try:
+        content = uploaded_file.read().decode('utf-8')
+        data = json.loads(content)
+
+        # Normalize boolean values
+        for key, value in data.items():
+            if isinstance(value, str):
+                if value.upper() in ['SI', 'SÍ', 'TRUE', 'YES']:
+                    data[key] = True
+                elif value.upper() in ['NO', 'FALSE']:
+                    data[key] = False
+
+        return data
+    except Exception as e:
+        st.error(f"Error al procesar el archivo JSON: {str(e)}")
+        return {}
+
+
+def serialize_for_export(data: dict) -> dict:
+    """
+    Serialize data for JSON/Excel export, converting date objects to strings
+    Serializar datos para exportacion JSON/Excel, convirtiendo fechas a strings
+    """
+    result = {}
+    for key, value in data.items():
+        if isinstance(value, (date, datetime)):
+            result[key] = value.strftime("%d/%m/%Y")
+        elif isinstance(value, list):
+            # Handle list of dicts (like directors)
+            result[key] = value
+        else:
+            result[key] = value
+    return result
+
+
+def export_to_json(data: dict) -> str:
+    """Export data to JSON string"""
+    serialized = serialize_for_export(data)
+    return json.dumps(serialized, indent=2, ensure_ascii=False)
+
+
+def export_to_excel(data: dict) -> bytes:
+    """Export data to Excel bytes"""
+    serialized = serialize_for_export(data)
+
+    # Flatten the data for Excel
+    rows = []
+    for key, value in serialized.items():
+        if isinstance(value, list):
+            # For lists like directors, create a JSON string representation
+            rows.append({"Variable": key, "Valor": json.dumps(value, ensure_ascii=False)})
+        elif isinstance(value, bool):
+            rows.append({"Variable": key, "Valor": "SI" if value else "NO"})
+        else:
+            rows.append({"Variable": key, "Valor": str(value) if value else ""})
+
+    df = pd.DataFrame(rows)
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Metadatos')
+    output.seek(0)
+
+    return output.getvalue()
+
+
 def main():
     """Main application entry point / Punto de entrada principal"""
 
@@ -130,11 +203,19 @@ def main():
 
     # Import section / Sección de importación
     st.markdown("---")
-    st.subheader("📁 Importar datos desde archivo")
+    st.subheader("📁 Importar Metadatos")
 
-    col_import1, col_import2 = st.columns(2)
+    col_import1, col_import2, col_import3 = st.columns(3)
 
     with col_import1:
+        uploaded_json = st.file_uploader(
+            "Cargar archivo JSON (.json)",
+            type=['json'],
+            help="Archivo JSON con metadatos exportados previamente",
+            key="json_upload"
+        )
+
+    with col_import2:
         uploaded_excel = st.file_uploader(
             "Cargar archivo Excel (.xlsx, .xls)",
             type=['xlsx', 'xls'],
@@ -142,7 +223,7 @@ def main():
             key="excel_upload"
         )
 
-    with col_import2:
+    with col_import3:
         uploaded_word = st.file_uploader(
             "Cargar archivo Word (.docx)",
             type=['docx'],
@@ -153,7 +234,14 @@ def main():
     # Process uploaded files
     imported_data = {}
 
-    if uploaded_excel is not None:
+    if uploaded_json is not None:
+        with st.spinner("Procesando archivo JSON..."):
+            imported_data = process_json_file(uploaded_json)
+            if imported_data:
+                set_imported_data(imported_data)
+                st.success(f"✅ Se importaron {len(imported_data)} valores desde JSON")
+
+    elif uploaded_excel is not None:
         with st.spinner("Procesando archivo Excel..."):
             imported_data = process_uploaded_file(uploaded_excel, "excel")
             if imported_data:
@@ -192,33 +280,26 @@ def main():
         # Dates section / Sección de fechas
         st.markdown("### 📅 Fechas")
 
+        # Store dates as date objects for validation, formatting happens in context_builder
         fecha_hoy = parse_date_string(var_values.get('Fecha_de_hoy', ''))
         if not fecha_hoy:
             fecha_hoy = datetime.now().date()
-        var_values['Fecha_de_hoy'] = format_spanish_date(
-            st.date_input("Fecha de Hoy", value=fecha_hoy, key="fecha_hoy")
-        )
+        var_values['Fecha_de_hoy'] = st.date_input("Fecha de Hoy", value=fecha_hoy, key="fecha_hoy")
 
         fecha_encargo = parse_date_string(var_values.get('Fecha_encargo', ''))
         if not fecha_encargo:
             fecha_encargo = datetime.now().date()
-        var_values['Fecha_encargo'] = format_spanish_date(
-            st.date_input("Fecha del Encargo", value=fecha_encargo, key="fecha_encargo")
-        )
+        var_values['Fecha_encargo'] = st.date_input("Fecha del Encargo", value=fecha_encargo, key="fecha_encargo")
 
         fecha_ff = parse_date_string(var_values.get('FF_Ejecicio', ''))
         if not fecha_ff:
             fecha_ff = datetime.now().date()
-        var_values['FF_Ejecicio'] = format_spanish_date(
-            st.date_input("Fecha Fin del Ejercicio", value=fecha_ff, key="ff_ejercicio")
-        )
+        var_values['FF_Ejecicio'] = st.date_input("Fecha Fin del Ejercicio", value=fecha_ff, key="ff_ejercicio")
 
         fecha_cierre = parse_date_string(var_values.get('Fecha_cierre', ''))
         if not fecha_cierre:
             fecha_cierre = datetime.now().date()
-        var_values['Fecha_cierre'] = format_spanish_date(
-            st.date_input("Fecha de Cierre", value=fecha_cierre, key="fecha_cierre")
-        )
+        var_values['Fecha_cierre'] = st.date_input("Fecha de Cierre", value=fecha_cierre, key="fecha_cierre")
 
         # General info section / Sección de información general
         st.markdown("### 📝 Información General")
@@ -436,7 +517,9 @@ def main():
         key="num_directivos"
     )
 
+    # Store directors as list of dicts for validation, formatting happens in context_builder
     directivos_list = []
+    directivos_display = []
     indent = "                                  "
 
     for i in range(num_directivos):
@@ -446,9 +529,10 @@ def main():
         with col_cargo:
             cargo = st.text_input(f"Cargo {i+1}", key=f"dir_cargo_{i}")
         if nombre and cargo:
-            directivos_list.append(f"{indent} D. {nombre} - {cargo}")
+            directivos_list.append({"nombre": nombre, "cargo": cargo})
+            directivos_display.append(f"{indent} D. {nombre} - {cargo}")
 
-    var_values['lista_alto_directores'] = "\n".join(directivos_list)
+    var_values['lista_alto_directores'] = directivos_list
 
     # Signature section / Sección persona de firma
     st.markdown("---")
@@ -466,9 +550,9 @@ def main():
     )
 
     # Preview directors list
-    if directivos_list:
+    if directivos_display:
         st.markdown("#### Vista previa de la lista de directivos:")
-        st.code("\n".join(directivos_list))
+        st.code("\n".join(directivos_display))
 
     # Update session state
     st.session_state.form_data = {**var_values, **cond_values}
@@ -490,6 +574,43 @@ def main():
         st.success("✅ Todas las variables y condiciones están completas.")
     else:
         st.warning(f"⚠️ Faltan {len(missing_fields)} campos obligatorios: {', '.join(missing_fields)}")
+
+    # Export metadata section / Sección exportar metadatos
+    st.markdown("---")
+    st.subheader("💾 Exportar Metadatos")
+    st.info("Exporta los datos del formulario para usarlos posteriormente o compartirlos.")
+
+    # Combine all current data for export
+    all_current_data = {**var_values, **cond_values}
+
+    col_export1, col_export2 = st.columns(2)
+
+    with col_export1:
+        # Export to JSON
+        json_data = export_to_json(all_current_data)
+        client_name_safe = var_values.get('Nombre_Cliente', 'documento').replace(' ', '_').replace('/', '_')
+        json_filename = f"metadatos_{client_name_safe}_{datetime.now().strftime('%Y%m%d')}.json"
+
+        st.download_button(
+            label="📄 Exportar a JSON",
+            data=json_data,
+            file_name=json_filename,
+            mime="application/json",
+            help="Descarga los metadatos en formato JSON para importarlos posteriormente"
+        )
+
+    with col_export2:
+        # Export to Excel
+        excel_data = export_to_excel(all_current_data)
+        excel_filename = f"metadatos_{client_name_safe}_{datetime.now().strftime('%Y%m%d')}.xlsx"
+
+        st.download_button(
+            label="📊 Exportar a Excel",
+            data=excel_data,
+            file_name=excel_filename,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            help="Descarga los metadatos en formato Excel"
+        )
 
     # Generate button / Botón de generación
     st.markdown("---")
@@ -515,11 +636,19 @@ def main():
                     if result.success and result.output_path:
                         st.success("✅ Carta generada exitosamente!")
 
+                        # Display trace code
+                        st.markdown("### 🔖 Código de Traza")
+                        st.code(result.trace_id, language=None)
+                        st.caption("Este código identifica de forma única este documento generado. Guárdelo para referencia futura.")
+
+                        # Display generation info
+                        st.info(f"⏱️ Tiempo de generación: {result.duration_ms}ms")
+
                         # Read generated file
                         with open(result.output_path, 'rb') as f:
                             doc_bytes = f.read()
 
-                        filename = f"Carta_Manifestacion_{var_values['Nombre_Cliente'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.docx"
+                        filename = f"Carta_Manifestacion_{var_values['Nombre_Cliente'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}_{result.trace_id[:8]}.docx"
 
                         st.download_button(
                             label="📥 Descargar Carta de Manifestación",
@@ -530,8 +659,11 @@ def main():
                     else:
                         st.error(f"❌ Error al generar la carta: {result.error}")
                         if result.validation_errors:
+                            st.markdown("### Errores de validación:")
                             for err in result.validation_errors:
                                 st.warning(err)
+                        # Also show trace code for failed generations
+                        st.caption(f"Código de traza: {result.trace_id}")
 
                 except Exception as e:
                     st.error(f"❌ Error al generar la carta: {str(e)}")
