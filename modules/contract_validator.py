@@ -5,11 +5,19 @@ Validador de datos multicapa
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from datetime import date
+from datetime import date, datetime
 import re
 
 from .plugin_loader import PluginPack
 from .dsl_evaluator import evaluate_condition
+
+
+# Spanish month names for date parsing
+SPANISH_MONTHS = {
+    "enero": 1, "febrero": 2, "marzo": 3, "abril": 4,
+    "mayo": 5, "junio": 6, "julio": 7, "agosto": 8,
+    "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12
+}
 
 
 @dataclass
@@ -215,23 +223,43 @@ class ContractValidator:
 
     def _is_valid_date_string(self, value: str) -> bool:
         """Check if string is a valid date / Verificar si string es fecha valida"""
+        # First try Spanish date format: "31 de diciembre de 2025"
+        if self._parse_spanish_date(value):
+            return True
+
+        # Then try standard formats
         formats = [
             "%d/%m/%Y",
             "%Y-%m-%d",
             "%d-%m-%Y",
-            "%d de %B de %Y",
             "%Y/%m/%d",
+            "%d.%m.%Y",
         ]
 
         for fmt in formats:
             try:
-                from datetime import datetime
                 datetime.strptime(value, fmt)
                 return True
             except ValueError:
                 continue
 
         return False
+
+    def _parse_spanish_date(self, value: str) -> Optional[date]:
+        """Parse Spanish date format: '31 de diciembre de 2025'"""
+        pattern = r"(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})"
+        match = re.match(pattern, value.lower().strip())
+        if match:
+            day = int(match.group(1))
+            month_name = match.group(2)
+            year = int(match.group(3))
+            month = SPANISH_MONTHS.get(month_name)
+            if month:
+                try:
+                    return date(year, month, day)
+                except ValueError:
+                    pass
+        return None
 
 
 def validate_input(plugin: PluginPack, data: dict, check_required: bool = True) -> ValidationResult:

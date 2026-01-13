@@ -336,9 +336,15 @@ class ContextBuilder:
                 value = context[field]
 
                 if fmt_type == "date":
-                    # Store both original and formatted
-                    if not isinstance(value, str) or "de" not in value:
-                        context[f"{field}_formatted"] = format_spanish_date(value)
+                    # Format date to Spanish and replace the original value
+                    if isinstance(value, (date, datetime)):
+                        formatted_date = format_spanish_date(value)
+                        context[field] = formatted_date
+                        context[f"{field}_formatted"] = formatted_date
+                    elif isinstance(value, str) and "de" not in value:
+                        formatted_date = format_spanish_date(value)
+                        context[field] = formatted_date
+                        context[f"{field}_formatted"] = formatted_date
                     else:
                         context[f"{field}_formatted"] = value
 
