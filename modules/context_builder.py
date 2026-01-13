@@ -92,18 +92,30 @@ def format_percentage(value: Any) -> str:
         return str(value)
 
 
-def parse_date_string(date_string: str) -> Optional[date]:
+def parse_date_string(date_string: Any) -> Optional[date]:
     """
     Parse date string to date object
     Parsear string de fecha a objeto date
 
     Args:
-        date_string: Date string in various formats
+        date_string: Date string in various formats, or date/datetime object
 
     Returns:
         date object or None
     """
     if not date_string:
+        return None
+
+    # If already a date object, return it directly
+    if isinstance(date_string, date) and not isinstance(date_string, datetime):
+        return date_string
+
+    # If datetime object, extract the date
+    if isinstance(date_string, datetime):
+        return date_string.date()
+
+    # Must be a string from this point
+    if not isinstance(date_string, str):
         return None
 
     formats = [
