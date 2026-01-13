@@ -19,7 +19,7 @@ from modules.plugin_loader import load_plugin
 from modules.generate import generate_from_form
 from modules.context_builder import format_spanish_date, parse_date_string
 
-from .state_store import (
+from ui.streamlit_app.state_store import (
     init_session_state,
     get_field_value,
     set_field_value,
@@ -31,14 +31,14 @@ from .state_store import (
     set_imported_data,
     get_stable_key,
 )
-from .components import (
+from ui.streamlit_app.components import (
     render_header,
     render_section_header,
     render_success_message,
     render_error_message,
     render_divider,
 )
-from .form_renderer import FormRenderer
+from ui.streamlit_app.form_renderer import FormRenderer
 
 
 # Plugin configuration
